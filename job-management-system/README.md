@@ -4,11 +4,13 @@ A controlled, central system replacing spreadsheets, WhatsApp, and paper quotes 
 Systems' end-to-end job lifecycle: enquiry → booking → job → assessment → quote → invoice →
 payment, plus stock control and reporting.
 
-**Status: Phase 0, 1, and 2 are implemented** (Next.js/Supabase app scaffold, authentication,
+**Status: Phase 0 through 3 are implemented** (Next.js/Supabase app scaffold, authentication,
 role-based access, customers, jobs, status tracking, notes, communication log, attachments,
 audit log, quotes with PDF + approval tracking, quote-to-invoice conversion, standalone
-invoices, and payments with auto-derived status and receipts). Stock (Phase 3) onward is not
-yet built. Nothing has been deployed — see [`app/README.md`](app/README.md) for local setup.
+invoices, payments with auto-derived status and receipts, and stock management — categories,
+suppliers, products, and a stock ledger that deducts automatically when a product-linked
+invoice line item is created). Website integration (Phase 4) onward is not yet built. Nothing
+has been deployed — see [`app/README.md`](app/README.md) for local setup.
 
 ## Planning documents
 

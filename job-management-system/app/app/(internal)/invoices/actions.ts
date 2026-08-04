@@ -84,6 +84,7 @@ export async function addInvoiceLineItem(
 ): Promise<ActionState> {
   const parsed = lineItemSchema.safeParse({
     item_type: formData.get("item_type"),
+    product_id: formData.get("product_id") || "",
     description: formData.get("description"),
     quantity: formData.get("quantity"),
     unit_price: formData.get("unit_price"),
@@ -95,9 +96,10 @@ export async function addInvoiceLineItem(
   }
 
   const supabase = await createClient();
+  const { product_id, ...rest } = parsed.data;
   const { error } = await supabase
     .from("invoice_line_items")
-    .insert({ ...parsed.data, invoice_id: invoiceId });
+    .insert({ ...rest, product_id: product_id || null, invoice_id: invoiceId });
 
   if (error) return { error: "Could not add the line item." };
 

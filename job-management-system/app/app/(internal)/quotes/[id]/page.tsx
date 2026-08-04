@@ -39,7 +39,7 @@ export default async function QuoteDetailPage({
   const { data: quote } = await supabase.from("quotes").select("*").eq("id", id).single();
   if (!quote) notFound();
 
-  const [{ data: job }, { data: customer }, { data: lineItems }] = await Promise.all([
+  const [{ data: job }, { data: customer }, { data: lineItems }, { data: products }] = await Promise.all([
     supabase.from("jobs").select("id, job_number, service_requested").eq("id", quote.job_id).single(),
     supabase.from("customers").select("id, name, company_name").eq("id", quote.customer_id).single(),
     supabase
@@ -47,6 +47,11 @@ export default async function QuoteDetailPage({
       .select("id, item_type, description, quantity, unit_price, line_discount_percent, line_total")
       .eq("quote_id", id)
       .order("sort_order"),
+    supabase
+      .from("products")
+      .select("id, name, selling_price, unit")
+      .eq("is_active", true)
+      .order("name"),
   ]);
 
   const editable = quote.status === "draft" || quote.status === "sent";
@@ -105,7 +110,7 @@ export default async function QuoteDetailPage({
               </div>
               {editable && (
                 <div className="pt-2">
-                  <AddLineItemForm action={addQuoteLineItem.bind(null, quote.id)} />
+                  <AddLineItemForm action={addQuoteLineItem.bind(null, quote.id)} products={products ?? []} />
                 </div>
               )}
             </CardContent>

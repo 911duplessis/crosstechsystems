@@ -39,20 +39,26 @@ export default async function InvoiceDetailPage({
   const { data: invoice } = await supabase.from("invoices").select("*").eq("id", id).single();
   if (!invoice) notFound();
 
-  const [{ data: job }, { data: customer }, { data: lineItems }, { data: payments }] = await Promise.all([
-    supabase.from("jobs").select("id, job_number, service_requested").eq("id", invoice.job_id).single(),
-    supabase.from("customers").select("id, name, company_name").eq("id", invoice.customer_id).single(),
-    supabase
-      .from("invoice_line_items")
-      .select("id, item_type, description, quantity, unit_price, line_discount_percent, line_total")
-      .eq("invoice_id", id)
-      .order("sort_order"),
-    supabase
-      .from("payments")
-      .select("id, amount, payment_method, payment_date, reference_number, recorded_by")
-      .eq("invoice_id", id)
-      .order("payment_date", { ascending: false }),
-  ]);
+  const [{ data: job }, { data: customer }, { data: lineItems }, { data: payments }, { data: products }] =
+    await Promise.all([
+      supabase.from("jobs").select("id, job_number, service_requested").eq("id", invoice.job_id).single(),
+      supabase.from("customers").select("id, name, company_name").eq("id", invoice.customer_id).single(),
+      supabase
+        .from("invoice_line_items")
+        .select("id, item_type, description, quantity, unit_price, line_discount_percent, line_total")
+        .eq("invoice_id", id)
+        .order("sort_order"),
+      supabase
+        .from("payments")
+        .select("id, amount, payment_method, payment_date, reference_number, recorded_by")
+        .eq("invoice_id", id)
+        .order("payment_date", { ascending: false }),
+      supabase
+        .from("products")
+        .select("id, name, selling_price, unit")
+        .eq("is_active", true)
+        .order("name"),
+    ]);
 
   const editable = !invoice.quote_id && invoice.status === "unpaid";
   const isOverdue =
@@ -120,7 +126,7 @@ export default async function InvoiceDetailPage({
               </div>
               {editable && (
                 <div className="pt-2">
-                  <AddLineItemForm action={addInvoiceLineItem.bind(null, invoice.id)} />
+                  <AddLineItemForm action={addInvoiceLineItem.bind(null, invoice.id)} products={products ?? []} />
                 </div>
               )}
               {invoice.quote_id && (

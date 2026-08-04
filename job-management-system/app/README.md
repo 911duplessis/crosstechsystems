@@ -6,11 +6,12 @@ this app implements.
 
 ## Status
 
-**Phase 0, 1, and 2 are implemented**: customers, jobs, status tracking, notes, communication
-log, attachments, audit log, login (Phase 1) — plus quotes (with PDF generation and
-staff-recorded approval), quote → invoice conversion, standalone invoices, payments (with
-auto-derived unpaid/partial/paid status and receipt PDFs) (Phase 2). Stock (Phase 3), website
-integration (Phase 4), and automation (Phase 5) are not yet built — see
+**Phase 0 through 3 are implemented**: customers, jobs, status tracking, notes, communication
+log, attachments, audit log, login (Phase 1); quotes (PDF + staff-recorded approval), quote →
+invoice conversion, standalone invoices, payments with auto-derived status and receipts
+(Phase 2); product categories, suppliers, products, and an append-only stock ledger with
+auto-deduction on invoicing and low-stock/stock-value dashboard widgets (Phase 3). Website
+integration (Phase 4) and automation (Phase 5) are not yet built — see
 [`../docs/04-mvp-roadmap.md`](../docs/04-mvp-roadmap.md).
 
 No Supabase project has been provisioned yet. Nothing in this app has been deployed.

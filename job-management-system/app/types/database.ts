@@ -36,6 +36,8 @@ export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue" | "cancell
 export type DiscountType = "none" | "percent" | "fixed";
 export type LineItemType = "labour" | "product";
 export type PaymentMethod = "cash" | "eft" | "card" | "other";
+export type StockMovementType = "purchase_in" | "job_usage" | "sale" | "adjustment" | "return";
+export type StockReferenceType = "job" | "invoice" | "manual";
 
 export interface Database {
   public: {
@@ -430,6 +432,123 @@ export interface Database {
         Update: never;
         Relationships: [];
       };
+      product_categories: {
+        Row: {
+          id: string;
+          name: string;
+          parent_category_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          name: string;
+          parent_category_id?: string | null;
+        };
+        Update: {
+          name?: string;
+          parent_category_id?: string | null;
+        };
+        Relationships: [];
+      };
+      suppliers: {
+        Row: {
+          id: string;
+          name: string;
+          contact_name: string | null;
+          phone: string | null;
+          email: string | null;
+          address: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          name: string;
+          contact_name?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          address?: string | null;
+          notes?: string | null;
+        };
+        Update: {
+          name?: string;
+          contact_name?: string | null;
+          phone?: string | null;
+          email?: string | null;
+          address?: string | null;
+          notes?: string | null;
+        };
+        Relationships: [];
+      };
+      products: {
+        Row: {
+          id: string;
+          sku: string;
+          name: string;
+          description: string | null;
+          category_id: string | null;
+          supplier_id: string | null;
+          cost_price: number;
+          selling_price: number;
+          unit: string;
+          stock_quantity: number;
+          min_stock_level: number;
+          is_active: boolean;
+          website_visible: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          sku: string;
+          name: string;
+          description?: string | null;
+          category_id?: string | null;
+          supplier_id?: string | null;
+          cost_price?: number;
+          selling_price?: number;
+          unit?: string;
+          min_stock_level?: number;
+          is_active?: boolean;
+          website_visible?: boolean;
+        };
+        Update: {
+          sku?: string;
+          name?: string;
+          description?: string | null;
+          category_id?: string | null;
+          supplier_id?: string | null;
+          cost_price?: number;
+          selling_price?: number;
+          unit?: string;
+          min_stock_level?: number;
+          is_active?: boolean;
+          website_visible?: boolean;
+        };
+        Relationships: [];
+      };
+      stock_movements: {
+        Row: {
+          id: string;
+          product_id: string;
+          movement_type: StockMovementType;
+          quantity_change: number;
+          reference_type: StockReferenceType | null;
+          reference_id: string | null;
+          notes: string | null;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          product_id: string;
+          movement_type: StockMovementType;
+          quantity_change: number;
+          reference_type?: StockReferenceType | null;
+          reference_id?: string | null;
+          notes?: string | null;
+          created_by: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
       audit_logs: {
         Row: {
           id: string;
@@ -470,6 +589,8 @@ export interface Database {
       discount_type: DiscountType;
       line_item_type: LineItemType;
       payment_method: PaymentMethod;
+      stock_movement_type: StockMovementType;
+      stock_reference_type: StockReferenceType;
     };
     CompositeTypes: Record<string, never>;
   };

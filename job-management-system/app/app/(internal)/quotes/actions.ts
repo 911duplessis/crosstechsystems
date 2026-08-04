@@ -34,6 +34,7 @@ export async function addQuoteLineItem(
 ): Promise<ActionState> {
   const parsed = lineItemSchema.safeParse({
     item_type: formData.get("item_type"),
+    product_id: formData.get("product_id") || "",
     description: formData.get("description"),
     quantity: formData.get("quantity"),
     unit_price: formData.get("unit_price"),
@@ -45,9 +46,10 @@ export async function addQuoteLineItem(
   }
 
   const supabase = await createClient();
+  const { product_id, ...rest } = parsed.data;
   const { error } = await supabase
     .from("quote_line_items")
-    .insert({ ...parsed.data, quote_id: quoteId });
+    .insert({ ...rest, product_id: product_id || null, quote_id: quoteId });
 
   if (error) return { error: "Could not add the line item." };
 

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const lineItemSchema = z.object({
   item_type: z.enum(["labour", "product"]),
+  product_id: z.union([z.string().uuid(), z.literal("")]).optional(),
   description: z.string().trim().min(1, "Description is required"),
   quantity: z.coerce.number().positive("Quantity must be greater than 0"),
   unit_price: z.coerce.number().min(0, "Unit price can't be negative"),

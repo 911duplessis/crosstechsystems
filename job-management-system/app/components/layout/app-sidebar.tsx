@@ -18,6 +18,8 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/customers", label: "Customers", roles: ["admin", "manager", "sales"] },
   { href: "/quotes", label: "Quotes", roles: ["admin", "manager", "sales"] },
   { href: "/invoices", label: "Invoices", roles: ["admin", "manager", "sales"] },
+  { href: "/products", label: "Products", roles: ["admin", "manager", "sales", "technician"] },
+  { href: "/suppliers", label: "Suppliers", roles: ["admin", "manager"] },
   { href: "/audit-log", label: "Audit log", roles: ["admin", "manager"] },
 ];
 
