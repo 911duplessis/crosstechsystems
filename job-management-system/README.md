@@ -4,9 +4,10 @@ A controlled, central system replacing spreadsheets, WhatsApp, and paper quotes 
 Systems' end-to-end job lifecycle: enquiry → booking → job → assessment → quote → invoice →
 payment, plus stock control and reporting.
 
-**Status: planning phase. No application code has been written yet.** The documents below are
-the analysis, architecture, database design, and roadmap for review and approval before any
-implementation begins.
+**Status: Phase 0 and Phase 1 are implemented** (Next.js/Supabase app scaffold, authentication,
+role-based access, customers, jobs, status tracking, notes, communication log, attachments,
+audit log). Quotes/invoices/payments (Phase 2) onward are not yet built. Nothing has been
+deployed — see [`app/README.md`](app/README.md) for local setup.
 
 ## Planning documents
 
@@ -15,13 +16,17 @@ implementation begins.
 2. [`docs/02-architecture.md`](docs/02-architecture.md) — recommended stack, component
    diagram, role-based access control model, security approach, repo/deploy structure.
 3. [`docs/03-database-schema.md`](docs/03-database-schema.md) — full table-by-table schema
-   proposal, plus open questions that need your confirmation before Phase 1 build.
+   proposal, plus open questions that need your confirmation before later phases.
 4. [`docs/04-mvp-roadmap.md`](docs/04-mvp-roadmap.md) — phase-by-phase implementation plan
    (Phase 0 foundations → Phase 5 automation) and GitHub workflow conventions.
 
+## Application
+
+The implementation lives in [`app/`](app) — see [`app/README.md`](app/README.md) for local
+setup (Supabase project, environment variables, running migrations, creating the first admin
+user).
+
 ## Next step
 
-Review the four documents above, answer the open questions in
-`docs/03-database-schema.md` §3.9, and confirm the plan (or request changes). Once approved,
-Phase 0/1 implementation begins on a dedicated feature branch — nothing gets deployed without
-a separate explicit go-ahead.
+Review the app, confirm Phase 1 covers what's needed, then proceed to Phase 2
+(quotes/invoices/payments) — or request changes first.

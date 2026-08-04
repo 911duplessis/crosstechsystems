@@ -5,11 +5,14 @@ import { getCurrentProfile } from "@/lib/auth/session";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { JOB_STATUS_LABELS, JOB_PRIORITY_LABELS } from "@/lib/jobs/status";
+import { JOB_STATUS_LABELS, JOB_PRIORITY_LABELS, JOB_NOTE_TYPE_LABELS } from "@/lib/jobs/status";
 import { priorityBadgeVariant, statusBadgeVariant } from "@/lib/jobs/badge-variants";
 import { FULL_JOB_VISIBILITY_ROLES } from "@/lib/auth/roles";
 import { StatusForm } from "./status-form";
 import { TechnicianForm } from "./technician-form";
+import { NoteForm } from "./note-form";
+import { CommLogForm } from "./comm-log-form";
+import { AttachmentsPanel } from "../../attachments/attachments-panel";
 
 export default async function JobDetailPage({
   params,
@@ -23,23 +26,41 @@ export default async function JobDetailPage({
   const { data: job } = await supabase.from("jobs").select("*").eq("id", id).single();
   if (!job || !profile) notFound();
 
-  const [{ data: customer }, { data: history }, { data: technicians }] = await Promise.all([
-    supabase.from("customers").select("id, name, company_name, phone, email").eq("id", job.customer_id).single(),
-    supabase
-      .from("job_status_history")
-      .select("id, old_status, new_status, note, changed_by, changed_at")
-      .eq("job_id", id)
-      .order("changed_at", { ascending: false }),
-    FULL_JOB_VISIBILITY_ROLES.includes(profile.role)
-      ? supabase.from("profiles").select("id, full_name").eq("role", "technician").eq("is_active", true).order("full_name")
-      : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
-  ]);
+  const [{ data: customer }, { data: history }, { data: technicians }, { data: notes }, { data: commLogs }] =
+    await Promise.all([
+      supabase.from("customers").select("id, name, company_name, phone, email").eq("id", job.customer_id).single(),
+      supabase
+        .from("job_status_history")
+        .select("id, old_status, new_status, note, changed_by, changed_at")
+        .eq("job_id", id)
+        .order("changed_at", { ascending: false }),
+      FULL_JOB_VISIBILITY_ROLES.includes(profile.role)
+        ? supabase.from("profiles").select("id, full_name").eq("role", "technician").eq("is_active", true).order("full_name")
+        : Promise.resolve({ data: [] as { id: string; full_name: string }[] }),
+      supabase
+        .from("job_notes")
+        .select("id, note_type, content, time_estimate_hours, author_id, created_at")
+        .eq("job_id", id)
+        .order("created_at", { ascending: false }),
+      supabase
+        .from("communication_logs")
+        .select("id, channel, direction, summary, logged_by, occurred_at")
+        .eq("job_id", id)
+        .order("occurred_at", { ascending: false }),
+    ]);
 
-  const changerIds = [...new Set((history ?? []).map((h) => h.changed_by))];
-  const { data: changers } = changerIds.length
-    ? await supabase.from("profiles").select("id, full_name").in("id", changerIds)
+  const peopleIds = [
+    ...new Set([
+      ...(history ?? []).map((h) => h.changed_by),
+      ...(notes ?? []).map((n) => n.author_id),
+      ...(commLogs ?? []).map((c) => c.logged_by),
+    ]),
+  ];
+  const { data: people } = peopleIds.length
+    ? await supabase.from("profiles").select("id, full_name").in("id", peopleIds)
     : { data: [] as { id: string; full_name: string }[] };
-  const changerNames = new Map((changers ?? []).map((c) => [c.id, c.full_name]));
+  const peopleNames = new Map((people ?? []).map((p) => [p.id, p.full_name]));
+  const changerNames = peopleNames;
 
   const canReassign = FULL_JOB_VISIBILITY_ROLES.includes(profile.role);
 
@@ -127,6 +148,69 @@ export default async function JobDetailPage({
               </ol>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Notes</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <NoteForm jobId={job.id} />
+              <ul className="space-y-3">
+                {(notes ?? []).map((note) => (
+                  <li key={note.id} className="rounded-md border p-3 text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <Badge variant="outline">{JOB_NOTE_TYPE_LABELS[note.note_type]}</Badge>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(note.created_at).toLocaleString()} ·{" "}
+                        {peopleNames.get(note.author_id) ?? "Unknown"}
+                      </span>
+                    </div>
+                    <p className="mt-1 whitespace-pre-wrap">{note.content}</p>
+                    {note.time_estimate_hours != null && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        Estimated: {note.time_estimate_hours}h
+                      </p>
+                    )}
+                  </li>
+                ))}
+                {!notes?.length && (
+                  <p className="text-sm text-muted-foreground">No notes yet.</p>
+                )}
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                Communication history
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <CommLogForm jobId={job.id} customerId={job.customer_id} />
+              <ul className="space-y-3">
+                {(commLogs ?? []).map((entry) => (
+                  <li key={entry.id} className="rounded-md border p-3 text-sm">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="capitalize">
+                        {entry.channel} · {entry.direction}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(entry.occurred_at).toLocaleString()} ·{" "}
+                        {peopleNames.get(entry.logged_by) ?? "Unknown"}
+                      </span>
+                    </div>
+                    <p className="mt-1">{entry.summary}</p>
+                  </li>
+                ))}
+                {!commLogs?.length && (
+                  <p className="text-sm text-muted-foreground">No communication logged yet.</p>
+                )}
+              </ul>
+            </CardContent>
+          </Card>
+
+          <AttachmentsPanel entityType="job" entityId={job.id} revalidatePathValue={`/jobs/${job.id}`} />
         </div>
 
         <div className="space-y-6">

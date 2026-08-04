@@ -3,7 +3,12 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import { newJobSchema, statusChangeSchema } from "@/lib/validation/job";
+import {
+  newJobSchema,
+  statusChangeSchema,
+  jobNoteSchema,
+  communicationLogSchema,
+} from "@/lib/validation/job";
 
 export interface JobFormState {
   error?: string;
@@ -127,4 +132,88 @@ export async function assignTechnician(jobId: string, formData: FormData) {
   }
 
   revalidatePath(`/jobs/${jobId}`);
+}
+
+export interface JobNoteFormState {
+  error?: string;
+}
+
+export async function addJobNote(
+  jobId: string,
+  _prevState: JobNoteFormState,
+  formData: FormData,
+): Promise<JobNoteFormState> {
+  const parsed = jobNoteSchema.safeParse({
+    note_type: formData.get("note_type"),
+    content: formData.get("content"),
+    time_estimate_hours: formData.get("time_estimate_hours") ?? "",
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Check the form for errors." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session expired. Please sign in again." };
+
+  const { time_estimate_hours, ...rest } = parsed.data;
+
+  const { error } = await supabase.from("job_notes").insert({
+    ...rest,
+    job_id: jobId,
+    author_id: user.id,
+    time_estimate_hours:
+      typeof time_estimate_hours === "number" ? time_estimate_hours : null,
+  });
+
+  if (error) {
+    return { error: "Could not save the note. Please try again." };
+  }
+
+  revalidatePath(`/jobs/${jobId}`);
+  return {};
+}
+
+export interface CommLogFormState {
+  error?: string;
+}
+
+export async function addCommunicationLog(
+  jobId: string,
+  customerId: string,
+  _prevState: CommLogFormState,
+  formData: FormData,
+): Promise<CommLogFormState> {
+  const parsed = communicationLogSchema.safeParse({
+    channel: formData.get("channel"),
+    direction: formData.get("direction"),
+    summary: formData.get("summary"),
+  });
+
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message ?? "Check the form for errors." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Your session expired. Please sign in again." };
+
+  const { error } = await supabase.from("communication_logs").insert({
+    ...parsed.data,
+    job_id: jobId,
+    customer_id: customerId,
+    logged_by: user.id,
+  });
+
+  if (error) {
+    return { error: "Could not save the log entry. Please try again." };
+  }
+
+  revalidatePath(`/jobs/${jobId}`);
+  return {};
 }

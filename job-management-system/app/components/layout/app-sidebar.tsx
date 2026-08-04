@@ -16,6 +16,7 @@ const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Dashboard" },
   { href: "/jobs", label: "Jobs" },
   { href: "/customers", label: "Customers", roles: ["admin", "manager", "sales"] },
+  { href: "/audit-log", label: "Audit log", roles: ["admin", "manager"] },
 ];
 
 export function AppSidebar({ role }: { role: Role }) {

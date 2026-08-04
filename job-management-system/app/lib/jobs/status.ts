@@ -50,3 +50,11 @@ export const JOB_PRIORITY_LABELS = {
   high: "High",
   urgent: "Urgent",
 } as const;
+
+export const JOB_NOTE_TYPE_LABELS = {
+  general: "General",
+  fault_finding: "Fault finding",
+  materials_required: "Materials required",
+  labour_estimate: "Labour estimate",
+  internal_comment: "Internal comment",
+} as const;

@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CrossTech Systems — Job Management System (app)
 
-## Getting Started
+Next.js 16 (App Router, TypeScript, Tailwind, shadcn/ui) + Supabase (Postgres, Auth, Storage).
+See [`../docs`](../docs) for the system analysis, architecture, database schema, and roadmap
+this app implements.
 
-First, run the development server:
+## Status
+
+**Phase 0 + Phase 1 (customers, jobs, status tracking, notes, communication log, attachments,
+audit log, login) are implemented.** Quotes/invoices/payments (Phase 2), stock (Phase 3),
+website integration (Phase 4), and automation (Phase 5) are not yet built — see
+[`../docs/04-mvp-roadmap.md`](../docs/04-mvp-roadmap.md).
+
+No Supabase project has been provisioned yet. Nothing in this app has been deployed.
+
+## Local setup
+
+1. **Create a Supabase project** at [supabase.com](https://supabase.com) (or run one locally
+   via the [Supabase CLI](https://supabase.com/docs/guides/local-development)).
+2. **Run the migrations** in `supabase/migrations/` against that project, in order — either
+   via `npx supabase db push` (CLI linked to the project) or by pasting each file into the
+   Supabase SQL editor in filename order.
+3. **Copy `.env.example` to `.env.local`** and fill in the project URL and anon key from
+   Supabase → Project Settings → API.
+4. **Create your first user**: sign up via Supabase Auth (dashboard → Authentication → Add
+   user, or your own sign-up flow), then in the SQL editor promote it to admin:
+   ```sql
+   update public.profiles set role = 'admin' where email = 'you@example.com';
+   ```
+   (A profile row is created automatically for every new auth user, defaulting to
+   `technician` — see `supabase/migrations/0001_profiles.sql`.)
+5. **Install and run**:
+   ```bash
+   npm install
+   npm run dev
+   ```
+   Open [http://localhost:3000](http://localhost:3000).
+
+## Regenerating database types
+
+`types/database.ts` is hand-written to match the SQL migrations (no live project existed when
+it was created). Once a Supabase project is linked, replace it with the generated types and
+keep it regenerated after every new migration:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npx supabase gen types typescript --project-id <your-project-id> > types/database.ts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Scripts
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npm run dev` — start the dev server
+- `npm run build` — production build (also type-checks)
+- `npm run lint` — ESLint
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Conventions
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Every schema change is a new file in `supabase/migrations/`, numbered sequentially — never
+  edit a migration that's already been applied anywhere.
+- Role-based access is enforced in Postgres (Row-Level Security), not just hidden in the UI —
+  see the policies in each migration file.
+- No deploys without explicit sign-off; this repo/branch is the working copy.

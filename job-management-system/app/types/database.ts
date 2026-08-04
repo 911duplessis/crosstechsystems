@@ -22,6 +22,15 @@ export type JobStatus =
   | "cancelled";
 export type JobPriority = "low" | "normal" | "high" | "urgent";
 export type JobSource = "phone" | "whatsapp" | "email" | "walk_in" | "website" | "referral";
+export type JobNoteType =
+  | "fault_finding"
+  | "materials_required"
+  | "labour_estimate"
+  | "internal_comment"
+  | "general";
+export type CommChannel = "phone" | "whatsapp" | "email" | "in_person" | "sms";
+export type CommDirection = "inbound" | "outbound";
+export type AttachmentEntityType = "job" | "quote" | "invoice" | "customer";
 
 export interface Database {
   public: {
@@ -171,6 +180,71 @@ export interface Database {
         };
         Relationships: [];
       };
+      job_notes: {
+        Row: {
+          id: string;
+          job_id: string;
+          note_type: JobNoteType;
+          content: string;
+          time_estimate_hours: number | null;
+          author_id: string;
+          created_at: string;
+        };
+        Insert: {
+          job_id: string;
+          note_type?: JobNoteType;
+          content: string;
+          time_estimate_hours?: number | null;
+          author_id: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      communication_logs: {
+        Row: {
+          id: string;
+          customer_id: string;
+          job_id: string | null;
+          channel: CommChannel;
+          direction: CommDirection;
+          summary: string;
+          logged_by: string;
+          occurred_at: string;
+        };
+        Insert: {
+          customer_id: string;
+          job_id?: string | null;
+          channel: CommChannel;
+          direction: CommDirection;
+          summary: string;
+          logged_by: string;
+          occurred_at?: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      attachments: {
+        Row: {
+          id: string;
+          entity_type: AttachmentEntityType;
+          entity_id: string;
+          file_path: string;
+          file_type: string | null;
+          caption: string | null;
+          uploaded_by: string;
+          created_at: string;
+        };
+        Insert: {
+          entity_type: AttachmentEntityType;
+          entity_id: string;
+          file_path: string;
+          file_type?: string | null;
+          caption?: string | null;
+          uploaded_by: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
       audit_logs: {
         Row: {
           id: string;
@@ -202,6 +276,10 @@ export interface Database {
       job_status: JobStatus;
       job_priority: JobPriority;
       job_source: JobSource;
+      job_note_type: JobNoteType;
+      comm_channel: CommChannel;
+      comm_direction: CommDirection;
+      attachment_entity_type: AttachmentEntityType;
     };
     CompositeTypes: Record<string, never>;
   };

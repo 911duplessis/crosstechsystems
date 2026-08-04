@@ -35,3 +35,23 @@ export const statusChangeSchema = z.object({
   status: z.enum(jobStatusValues),
   note: z.string().trim().optional(),
 });
+
+export const jobNoteSchema = z.object({
+  note_type: z.enum([
+    "fault_finding",
+    "materials_required",
+    "labour_estimate",
+    "internal_comment",
+    "general",
+  ]),
+  content: z.string().trim().min(1, "Note content is required"),
+  time_estimate_hours: z
+    .union([z.string().trim().length(0), z.coerce.number().min(0).max(999)])
+    .optional(),
+});
+
+export const communicationLogSchema = z.object({
+  channel: z.enum(["phone", "whatsapp", "email", "in_person", "sms"]),
+  direction: z.enum(["inbound", "outbound"]),
+  summary: z.string().trim().min(1, "Summary is required"),
+});
