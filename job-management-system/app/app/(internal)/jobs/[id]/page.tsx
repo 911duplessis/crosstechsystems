@@ -13,6 +13,8 @@ import { TechnicianForm } from "./technician-form";
 import { NoteForm } from "./note-form";
 import { CommLogForm } from "./comm-log-form";
 import { AttachmentsPanel } from "../../attachments/attachments-panel";
+import { Button } from "@/components/ui/button";
+import { formatMoney } from "@/lib/format";
 
 export default async function JobDetailPage({
   params,
@@ -63,6 +65,22 @@ export default async function JobDetailPage({
   const changerNames = peopleNames;
 
   const canReassign = FULL_JOB_VISIBILITY_ROLES.includes(profile.role);
+  const canSeeCommercials = FULL_JOB_VISIBILITY_ROLES.includes(profile.role);
+
+  const [{ data: quotes }, { data: invoices }] = canSeeCommercials
+    ? await Promise.all([
+        supabase
+          .from("quotes")
+          .select("id, quote_number, status, total")
+          .eq("job_id", id)
+          .order("created_at", { ascending: false }),
+        supabase
+          .from("invoices")
+          .select("id, invoice_number, status, total, balance_due")
+          .eq("job_id", id)
+          .order("created_at", { ascending: false }),
+      ])
+    : [{ data: [] }, { data: [] }];
 
   return (
     <div className="space-y-6">
@@ -238,6 +256,53 @@ export default async function JobDetailPage({
                   currentTechnicianId={job.assigned_technician_id}
                   technicians={technicians ?? []}
                 />
+              </CardContent>
+            </Card>
+          )}
+
+          {canSeeCommercials && (
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-sm font-medium text-muted-foreground">
+                  Quotes &amp; invoices
+                </CardTitle>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  render={<Link href={`/quotes/new?job_id=${job.id}`}>New quote</Link>}
+                />
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm">
+                {(quotes ?? []).map((quote) => (
+                  <div key={quote.id} className="flex items-center justify-between">
+                    <Link href={`/quotes/${quote.id}`} className="hover:underline">
+                      {quote.quote_number}
+                    </Link>
+                    <span className="text-muted-foreground capitalize">
+                      {quote.status} · {formatMoney(quote.total)}
+                    </span>
+                  </div>
+                ))}
+                {(invoices ?? []).map((invoice) => (
+                  <div key={invoice.id} className="flex items-center justify-between">
+                    <Link href={`/invoices/${invoice.id}`} className="hover:underline">
+                      {invoice.invoice_number}
+                    </Link>
+                    <span className="text-muted-foreground capitalize">
+                      {invoice.status} · {formatMoney(invoice.balance_due)} due
+                    </span>
+                  </div>
+                ))}
+                {!quotes?.length && !invoices?.length && (
+                  <p className="text-muted-foreground">No quotes or invoices yet.</p>
+                )}
+                {!invoices?.length && (
+                  <Button
+                    size="xs"
+                    variant="ghost"
+                    render={<Link href={`/invoices/new?job_id=${job.id}`}>Invoice without a quote</Link>}
+                  />
+                )}
               </CardContent>
             </Card>
           )}

@@ -31,6 +31,11 @@ export type JobNoteType =
 export type CommChannel = "phone" | "whatsapp" | "email" | "in_person" | "sms";
 export type CommDirection = "inbound" | "outbound";
 export type AttachmentEntityType = "job" | "quote" | "invoice" | "customer";
+export type QuoteStatus = "draft" | "sent" | "approved" | "rejected" | "expired";
+export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue" | "cancelled";
+export type DiscountType = "none" | "percent" | "fixed";
+export type LineItemType = "labour" | "product";
+export type PaymentMethod = "cash" | "eft" | "card" | "other";
 
 export interface Database {
   public: {
@@ -245,6 +250,186 @@ export interface Database {
         Update: never;
         Relationships: [];
       };
+      quotes: {
+        Row: {
+          id: string;
+          quote_number: string;
+          job_id: string;
+          customer_id: string;
+          status: QuoteStatus;
+          issue_date: string;
+          expiry_date: string | null;
+          subtotal: number;
+          discount_type: DiscountType;
+          discount_value: number;
+          discount_amount: number;
+          tax_rate: number;
+          tax_amount: number;
+          total: number;
+          terms_and_conditions: string | null;
+          approved_at: string | null;
+          approved_by_note: string | null;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          job_id: string;
+          customer_id: string;
+          status?: QuoteStatus;
+          issue_date?: string;
+          expiry_date?: string | null;
+          discount_type?: DiscountType;
+          discount_value?: number;
+          tax_rate?: number;
+          terms_and_conditions?: string | null;
+          created_by: string;
+        };
+        Update: {
+          status?: QuoteStatus;
+          expiry_date?: string | null;
+          discount_type?: DiscountType;
+          discount_value?: number;
+          tax_rate?: number;
+          terms_and_conditions?: string | null;
+          approved_at?: string | null;
+          approved_by_note?: string | null;
+        };
+        Relationships: [];
+      };
+      quote_line_items: {
+        Row: {
+          id: string;
+          quote_id: string;
+          item_type: LineItemType;
+          product_id: string | null;
+          description: string;
+          quantity: number;
+          unit_price: number;
+          line_discount_percent: number;
+          line_total: number;
+          sort_order: number;
+        };
+        Insert: {
+          quote_id: string;
+          item_type?: LineItemType;
+          product_id?: string | null;
+          description: string;
+          quantity?: number;
+          unit_price?: number;
+          line_discount_percent?: number;
+          sort_order?: number;
+        };
+        Update: {
+          item_type?: LineItemType;
+          product_id?: string | null;
+          description?: string;
+          quantity?: number;
+          unit_price?: number;
+          line_discount_percent?: number;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
+      invoices: {
+        Row: {
+          id: string;
+          invoice_number: string;
+          quote_id: string | null;
+          job_id: string;
+          customer_id: string;
+          status: InvoiceStatus;
+          issue_date: string;
+          due_date: string | null;
+          subtotal: number;
+          discount_type: DiscountType;
+          discount_value: number;
+          discount_amount: number;
+          tax_rate: number;
+          tax_amount: number;
+          total: number;
+          amount_paid: number;
+          balance_due: number;
+          created_by: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          quote_id?: string | null;
+          job_id: string;
+          customer_id: string;
+          issue_date?: string;
+          due_date?: string | null;
+          discount_type?: DiscountType;
+          discount_value?: number;
+          tax_rate?: number;
+          created_by: string;
+        };
+        Update: {
+          status?: InvoiceStatus;
+          due_date?: string | null;
+          discount_type?: DiscountType;
+          discount_value?: number;
+          tax_rate?: number;
+        };
+        Relationships: [];
+      };
+      invoice_line_items: {
+        Row: {
+          id: string;
+          invoice_id: string;
+          item_type: LineItemType;
+          product_id: string | null;
+          description: string;
+          quantity: number;
+          unit_price: number;
+          line_discount_percent: number;
+          line_total: number;
+          sort_order: number;
+        };
+        Insert: {
+          invoice_id: string;
+          item_type?: LineItemType;
+          product_id?: string | null;
+          description: string;
+          quantity?: number;
+          unit_price?: number;
+          line_discount_percent?: number;
+          sort_order?: number;
+        };
+        Update: {
+          item_type?: LineItemType;
+          product_id?: string | null;
+          description?: string;
+          quantity?: number;
+          unit_price?: number;
+          line_discount_percent?: number;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
+      payments: {
+        Row: {
+          id: string;
+          invoice_id: string;
+          amount: number;
+          payment_method: PaymentMethod;
+          payment_date: string;
+          reference_number: string | null;
+          recorded_by: string;
+          created_at: string;
+        };
+        Insert: {
+          invoice_id: string;
+          amount: number;
+          payment_method: PaymentMethod;
+          payment_date?: string;
+          reference_number?: string | null;
+          recorded_by: string;
+        };
+        Update: never;
+        Relationships: [];
+      };
       audit_logs: {
         Row: {
           id: string;
@@ -280,6 +465,11 @@ export interface Database {
       comm_channel: CommChannel;
       comm_direction: CommDirection;
       attachment_entity_type: AttachmentEntityType;
+      quote_status: QuoteStatus;
+      invoice_status: InvoiceStatus;
+      discount_type: DiscountType;
+      line_item_type: LineItemType;
+      payment_method: PaymentMethod;
     };
     CompositeTypes: Record<string, never>;
   };

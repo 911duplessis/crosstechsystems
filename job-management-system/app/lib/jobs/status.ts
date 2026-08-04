@@ -30,7 +30,7 @@ export const JOB_STATUS_LABELS: Record<JobStatus, string> = {
   cancelled: "Cancelled",
 };
 
-const OPEN_STATUSES: JobStatus[] = [
+export const OPEN_STATUSES: JobStatus[] = [
   "new_enquiry",
   "scheduled",
   "inspection_required",
