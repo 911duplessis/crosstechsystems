@@ -14,7 +14,18 @@ auto-deduction on invoicing and low-stock/stock-value dashboard widgets (Phase 3
 integration (Phase 4) and automation (Phase 5) are not yet built — see
 [`../docs/04-mvp-roadmap.md`](../docs/04-mvp-roadmap.md).
 
-No Supabase project has been provisioned yet. Nothing in this app has been deployed.
+**Tested end-to-end against a local Supabase instance** (Supabase CLI, one seeded user per
+role) with a Playwright-driven browser walkthrough of every phase: auth, customers, jobs,
+notes/comms/attachments, the full quote → send → approve → convert-to-invoice → payment flow
+(exact VAT/discount math verified), stock auto-deduction on invoicing, dashboard widgets, and
+RLS role isolation (technician sees only their assigned jobs and jobs' customers, zero access
+to quotes/invoices/suppliers). That session found and fixed six real bugs — a missing-grants
+issue that blocked every table under RLS, an RLS policy recursion cycle, a session-cookie drop
+on redirect, and three UI-crash/warning issues — see recent commits for details.
+
+No Supabase project has been provisioned for production/staging, and nothing has been
+deployed. The local-instance testing above used a throwaway Supabase CLI stack, not a
+long-lived project.
 
 ## Local setup
 

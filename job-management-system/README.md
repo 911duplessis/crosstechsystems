@@ -4,13 +4,16 @@ A controlled, central system replacing spreadsheets, WhatsApp, and paper quotes 
 Systems' end-to-end job lifecycle: enquiry → booking → job → assessment → quote → invoice →
 payment, plus stock control and reporting.
 
-**Status: Phase 0 through 3 are implemented** (Next.js/Supabase app scaffold, authentication,
-role-based access, customers, jobs, status tracking, notes, communication log, attachments,
-audit log, quotes with PDF + approval tracking, quote-to-invoice conversion, standalone
-invoices, payments with auto-derived status and receipts, and stock management — categories,
-suppliers, products, and a stock ledger that deducts automatically when a product-linked
-invoice line item is created). Website integration (Phase 4) onward is not yet built. Nothing
-has been deployed — see [`app/README.md`](app/README.md) for local setup.
+**Status: Phase 0 through 3 are implemented and tested end-to-end** against a local Supabase
+instance (Next.js/Supabase app scaffold, authentication, role-based access, customers, jobs,
+status tracking, notes, communication log, attachments, audit log, quotes with PDF + approval
+tracking, quote-to-invoice conversion, standalone invoices, payments with auto-derived status
+and receipts, and stock management — categories, suppliers, products, and a stock ledger that
+deducts automatically when a product-linked invoice line item is created). A full browser
+walkthrough of every phase, plus RLS role-isolation checks, found and fixed six real bugs
+(see `app/README.md` and recent commits). Website integration (Phase 4) onward is not yet
+built. Nothing has been deployed to a real Supabase project — see
+[`app/README.md`](app/README.md) for local setup.
 
 ## Planning documents
 
@@ -31,5 +34,6 @@ user).
 
 ## Next step
 
-Review the app, confirm Phase 1 covers what's needed, then proceed to Phase 2
-(quotes/invoices/payments) — or request changes first.
+Phases 1-3 are built and tested. Remaining: Phase 4 (website integration — needs a decision on
+how it connects to the existing marketing site) and Phase 5 (automation — needs WhatsApp/email
+provider accounts). Confirm the built phases cover what's needed, or say where to go next.
