@@ -35,14 +35,26 @@ export async function updateSession(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(redirectUrl);
+    return redirectPreservingSession(redirectUrl, response);
   }
 
   if (user && request.nextUrl.pathname === "/login") {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/";
-    return NextResponse.redirect(redirectUrl);
+    return redirectPreservingSession(redirectUrl, response);
   }
 
   return response;
+}
+
+// A bare `NextResponse.redirect(...)` is a brand-new response object — any
+// session cookie `setAll` refreshed onto `response` (e.g. a rotated refresh
+// token) would otherwise be silently dropped on every request that happens
+// to redirect, leaving the browser holding an already-invalidated refresh
+// token and bouncing between authenticated/unauthenticated on alternating
+// requests.
+function redirectPreservingSession(url: URL, response: NextResponse) {
+  const redirectResponse = NextResponse.redirect(url);
+  response.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie));
+  return redirectResponse;
 }

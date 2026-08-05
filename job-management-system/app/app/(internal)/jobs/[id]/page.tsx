@@ -239,7 +239,7 @@ export default async function JobDetailPage({
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <StatusForm jobId={job.id} currentStatus={job.status} />
+              <StatusForm key={job.updated_at} jobId={job.id} currentStatus={job.status} />
             </CardContent>
           </Card>
 
@@ -252,6 +252,7 @@ export default async function JobDetailPage({
               </CardHeader>
               <CardContent>
                 <TechnicianForm
+                  key={job.updated_at}
                   jobId={job.id}
                   currentTechnicianId={job.assigned_technician_id}
                   technicians={technicians ?? []}

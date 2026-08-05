@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -35,7 +36,9 @@ export function UserMenu({ fullName, role }: { fullName: string; role: string })
         }
       />
       <DropdownMenuContent align="end">
-        <DropdownMenuLabel className="capitalize">{role}</DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="capitalize">{role}</DropdownMenuLabel>
+        </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => signOut()}>Sign out</DropdownMenuItem>
       </DropdownMenuContent>

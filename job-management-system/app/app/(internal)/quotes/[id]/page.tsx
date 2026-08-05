@@ -124,6 +124,7 @@ export default async function QuoteDetailPage({
             </CardHeader>
             <CardContent>
               <QuoteMetaForm
+                key={quote.updated_at}
                 action={updateQuoteMeta.bind(null, quote.id)}
                 discountType={quote.discount_type}
                 discountValue={quote.discount_value}

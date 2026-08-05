@@ -146,6 +146,7 @@ export default async function InvoiceDetailPage({
             </CardHeader>
             <CardContent>
               <InvoiceMetaForm
+                key={invoice.updated_at}
                 action={updateInvoiceMeta.bind(null, invoice.id)}
                 discountType={invoice.discount_type}
                 discountValue={invoice.discount_value}
